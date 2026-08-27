@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v31">
+<meta name="app-version" content="v32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -20,7 +20,7 @@ button,input,select{font:inherit}button{min-height:44px;border-radius:10px;borde
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;font-size:12px;color:#777;padding:4px}.day{min-height:78px;padding:6px;text-align:left;vertical-align:top}.today{outline:2px solid #222}.selected{background:#eee}
 .event{font-size:11px;line-height:1.35;margin-top:4px;overflow:hidden}.muted{color:#777;font-size:13px}
 label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccc;border-radius:10px;background:#fff}
-.hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:auto}.danger{color:#a00}
+.hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:none;cursor:grab}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
 @media(max-width:420px){main{padding:12px}.day{min-height:68px;padding:4px}.event{font-size:10px}.card{padding:12px}}
 
   .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:92px}.picker-overlay.hidden{display:none}
@@ -192,17 +192,15 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   function renderList(){
     $("savedCount").textContent=events.length+"件";
 
-    // 基準日の新しい順 → 古い順。元のevents配列は変更しない。
-    const sorted=events.map((e,i)=>({e,i})).sort((a,b)=>{
-      const byDate=b.e.date.localeCompare(a.e.date);
-      return byDate!==0 ? byDate : a.i-b.i;
-    });
+    // 表示用のコピーだけを基準日の新しい順に並べる。
+    // events本体は変更しないため、v20の登録データ構造を維持する。
+    const displayEvents=[...events].sort((a,b)=>b.date.localeCompare(a.date));
 
-    $("list").innerHTML=sorted.length
-      ? sorted.map(({e,i})=>`<div class="item saved-item">
+    $("list").innerHTML=displayEvents.length
+      ? displayEvents.map(e=>`<div class="item saved-item">
           <div><strong>${icon(e.type)} ${escapeHtml(e.name)}</strong></div>
           <div class="muted">${e.date.replaceAll("-","/")}　${escapeHtml(e.memo||"")}</div>
-          <button type="button" data-del="${i}" style="margin-top:7px">削除</button>
+          <button type="button" data-del="${events.indexOf(e)}" style="margin-top:7px">削除</button>
         </div>`).join("")
       : `<p class="muted">まだ登録されていません。</p>`;
 

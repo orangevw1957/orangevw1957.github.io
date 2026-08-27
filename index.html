@@ -68,6 +68,10 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
 
   #monthPickerBtn{cursor:pointer}
+
+  .calendar-date-trigger{position:relative;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:inherit;padding:8px 6px;line-height:1;min-height:44px;cursor:pointer}
+  .calendar-date-trigger #monthPickerLabel{pointer-events:none}
+  .calendar-date-trigger input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;margin:0;padding:0;cursor:pointer;z-index:2}
 </style>
 </head>
 <body>
@@ -77,7 +81,10 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   <section class="card">
     <div class="row">
-      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><button id="monthPickerBtn" type="button" style="border:0;background:transparent;font-weight:700;font-size:inherit;padding:8px 6px">2026年8月</button>
+      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><span class="calendar-date-trigger">
+        <span id="monthPickerLabel">2026年8月</span>
+        <input id="calendarDatePicker" type="date" aria-label="年月日を選択">
+      </span>
       <input id="calendarDatePicker" type="date" aria-label="年月日を選択" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
     </div>
     <div id="cal" class="calendar" style="margin-top:10px"></div>
@@ -235,121 +242,29 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);syncCalendarPicker();render()};
   
 
-  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"),
-        wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth"), wheelDay=$("wheelDay");
-  let pickerYear=view.getFullYear(), pickerMonth=view.getMonth(), pickerDay=selected.d||new Date().getDate();
 
-  function makeWheelOption(label,value,selected){
-    const el=document.createElement("div");
-    el.className="wheel-option"+(selected?" selected":"");
-    el.dataset.value=value; el.textContent=label; return el;
+  const calendarDatePicker=$("calendarDatePicker");
+  const monthPickerLabel=$("monthPickerLabel");
+
+  function selectedDateString(){
+    return `${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;
+  }
+  function syncCalendarPicker(){
+    calendarDatePicker.value=selectedDateString();
+    monthPickerLabel.textContent=`${view.getFullYear()}年${view.getMonth()+1}月`;
   }
 
-  function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+  syncCalendarPicker();
 
-  function updateWheel(container){
-    const center=container.scrollTop+container.clientHeight/2;
-    let best=null,dist=Infinity;
-    [...container.children].forEach(el=>{
-      const c=el.offsetTop+el.offsetHeight/2,d=Math.abs(c-center);
-      el.classList.remove("selected");
-      if(d<dist){dist=d;best=el}
-    });
-    if(best){best.classList.add("selected");return Number(best.dataset.value)}
-    return null;
-  }
-
-  function rebuildDays(){
-    const max=daysInMonth(pickerYear,pickerMonth);
-    if(pickerDay>max) pickerDay=max;
-    wheelDay.innerHTML="";
-    for(let d=1;d<=max;d++) wheelDay.appendChild(makeWheelOption(d+"日",d,d===pickerDay));
-    requestAnimationFrame(()=>{
-      wheelDay.scrollTop=(pickerDay-1)*54;
-      updateWheel(wheelDay);
-    });
-  }
-
-  function buildPicker(){
-    pickerYear=view.getFullYear();
-    pickerMonth=view.getMonth();
-    pickerDay=selected.d || 1;
-
-    const max=daysInMonth(pickerYear,pickerMonth);
-    if(pickerDay>max) pickerDay=max;
-
-    wheelYear.innerHTML=""; wheelMonth.innerHTML=""; wheelDay.innerHTML="";
-    for(let y=1900;y<=2100;y++) wheelYear.appendChild(makeWheelOption(y+"年",y,y===pickerYear));
-    for(let m=0;m<12;m++) wheelMonth.appendChild(makeWheelOption((m+1)+"月",m,m===pickerMonth));
-    for(let d=1;d<=max;d++) wheelDay.appendChild(makeWheelOption(d+"日",d,d===pickerDay));
-
-    requestAnimationFrame(()=>{
-      wheelYear.scrollTop=(pickerYear-1900)*54;
-      wheelMonth.scrollTop=pickerMonth*54;
-      wheelDay.scrollTop=(pickerDay-1)*54;
-      updateWheel(wheelYear); updateWheel(wheelMonth); updateWheel(wheelDay);
-    });
-  }
-
-  function watchWheel(el,isYear,isMonth){
-    let timer=null;
-    el.addEventListener("scroll",()=>{
-      clearTimeout(timer);
-      timer=setTimeout(()=>{
-        const v=updateWheel(el);
-        if(v===null)return;
-        if(isYear){
-          pickerYear=v;
-          const oldDay=pickerDay;
-          rebuildDays();
-          pickerDay=Math.min(oldDay,daysInMonth(pickerYear,pickerMonth));
-          requestAnimationFrame(()=>{wheelDay.scrollTop=(pickerDay-1)*54;updateWheel(wheelDay)});
-        }else if(isMonth){
-          pickerMonth=v;
-          const oldDay=pickerDay;
-          rebuildDays();
-          pickerDay=Math.min(oldDay,daysInMonth(pickerYear,pickerMonth));
-          requestAnimationFrame(()=>{wheelDay.scrollTop=(pickerDay-1)*54;updateWheel(wheelDay)});
-        }else{
-          pickerDay=v;
-        }
-      },80);
-    });
-  }
-
-  watchWheel(wheelYear,true,false);
-  watchWheel(wheelMonth,false,true);
-  watchWheel(wheelDay,false,false);
-
-  monthBtn.onclick=()=>{
-    buildPicker();
-    picker.classList.remove("hidden");
-    picker.setAttribute("aria-hidden","false");
-    document.body.style.overflow="hidden";
-  };
-
-  $("cancelPicker").onclick=()=>{
-    picker.classList.add("hidden");
-    picker.setAttribute("aria-hidden","true");
-    document.body.style.overflow="";
-  };
-
-  picker.addEventListener("click",e=>{
-    if(e.target===picker) $("cancelPicker").click();
-  });
-
-  $("applyWheel").onclick=()=>{
-    selected={y:pickerYear,m:pickerMonth,d:pickerDay};
-    view=new Date(pickerYear,pickerMonth,1);
-    picker.classList.add("hidden");
-    picker.setAttribute("aria-hidden","true");
-    document.body.style.overflow="";
+  calendarDatePicker.addEventListener("change",()=>{
+    if(!calendarDatePicker.value)return;
+    const d=parse(calendarDatePicker.value);
+    selected={y:d.y,m:d.m,d:d.d};
+    view=new Date(d.y,d.m,1);
+    syncCalendarPicker();
     render();
-  };
-
-  document.addEventListener("keydown",e=>{
-    if(e.key==="Escape"&&!picker.classList.contains("hidden")) $("cancelPicker").click();
   });
+
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

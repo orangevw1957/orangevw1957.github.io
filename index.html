@@ -218,74 +218,23 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
   function renderList(){
     $("savedCount").textContent=events.length+"件";
-    $("list").innerHTML=events.length?events.map((e,i)=>`<div class="item saved-item" draggable="true" data-index="${i}"><div><span class="drag-handle">☷</span><strong>${icon(e.type)} ${escapeHtml(e.name)}</strong></div><div class="muted">${e.date.replaceAll("-","/")}　${escapeHtml(e.memo||"")}</div><button type="button" data-del="${i}" style="margin-top:7px">削除</button></div>`).join(""):`<p class="muted">まだ登録されていません。</p>`;
+
+    // 登録済みは「基準日の新しい順 → 古い順」に固定。
+    const sorted=events.map((e,i)=>({...e,_originalIndex:i}))
+      .sort((a,b)=>b.date.localeCompare(a.date));
+
+    $("list").innerHTML=sorted.length?sorted.map((e,i)=>`<div class="item saved-item" draggable="true" data-index="${i}" data-original-index="${e._originalIndex}">
+      <div><span class="drag-handle">☷</span><strong>${icon(e.type)} ${escapeHtml(e.name)}</strong></div>
+      <div class="muted">${e.date.replaceAll("-","/")}　${escapeHtml(e.memo||"")}</div>
+      <button type="button" data-del="${e._originalIndex}" style="margin-top:7px">削除</button>
+    </div>`).join(""):`<p class="muted">まだ登録されていません。</p>`;
 
     document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
       events.splice(Number(b.dataset.del),1); save(); render();
     });
 
-    const items=[...document.querySelectorAll(".saved-item")];
-    let dragIndex=null, holdTimer=null, dragging=false;
-
-    items.forEach(item=>{
-      item.addEventListener("dragstart",e=>{
-        dragIndex=Number(item.dataset.index); dragging=true; item.classList.add("dragging");
-        e.dataTransfer.effectAllowed="move";
-      });
-      item.addEventListener("dragend",()=>{
-        item.classList.remove("dragging"); dragIndex=null; dragging=false; renderList();
-      });
-      item.addEventListener("dragover",e=>{
-        e.preventDefault();
-        if(dragIndex===null)return;
-        const overIndex=Number(item.dataset.index);
-        if(overIndex===dragIndex)return;
-        const rect=item.getBoundingClientRect();
-        const before=e.clientY<rect.top+rect.height/2;
-        const target=before?overIndex:overIndex+1;
-        const moved=events.splice(dragIndex,1)[0];
-        events.splice(target>dragIndex?target-1:target,0,moved);
-        dragIndex=before?overIndex:overIndex;
-        save(); renderList();
-      });
-
-      item.addEventListener("pointerdown",e=>{
-        if(e.target.closest("button"))return;
-        if(e.pointerType==="mouse")return;
-        holdTimer=setTimeout(()=>{
-          dragging=true; dragIndex=Number(item.dataset.index); item.classList.add("dragging");
-          if(item.setPointerCapture)item.setPointerCapture(e.pointerId);
-        },450);
-      });
-      item.addEventListener("pointermove",e=>{
-        if(!dragging||dragIndex===null)return;
-        const target=item.parentElement.querySelector(".saved-item:not(.dragging)");
-        const el=document.elementFromPoint(e.clientX,e.clientY)?.closest(".saved-item");
-        if(!el||el===item)return;
-        const overIndex=Number(el.dataset.index), rect=el.getBoundingClientRect();
-        const before=e.clientY<rect.top+rect.height/2;
-        const insertIndex=before?overIndex:overIndex+1;
-        if(overIndex===dragIndex || (insertIndex===dragIndex) || (insertIndex===dragIndex+1))return;
-        const moved=events.splice(dragIndex,1)[0];
-        const adjusted=insertIndex>dragIndex?insertIndex-1:insertIndex;
-        events.splice(adjusted,0,moved);
-        dragIndex=adjusted;
-        save(); renderList();
-        const current=document.querySelector(`.saved-item[data-index="${dragIndex}"]`);
-        if(current)current.classList.add("dragging");
-      });
-      item.addEventListener("pointerup",e=>{
-        clearTimeout(holdTimer);
-        if(dragging){
-          e.preventDefault(); item.classList.remove("dragging");
-          dragging=false; dragIndex=null; save(); renderList();
-        }
-      });
-      item.addEventListener("pointercancel",()=>{
-        clearTimeout(holdTimer);
-        if(dragging){item.classList.remove("dragging");dragging=false;dragIndex=null;renderList();}
-      });
-    });
+    // v22では表示順を基準日に固定するため、並べ替え操作は無効化。
+    // 以前のタップ＆ホールド用UIは表示だけ残し、順序は常に基準日順。
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function hint(){const t=$("type").value;$("hint").textContent=t==="memorial"?"亡くなった日から一周忌・三回忌・七回忌などを自動表示します。":t==="birthday"?"生年月日から毎年の年齢を自動表示します。":t==="anniversary"?"基準日から毎年の周年を自動表示します。":"毎年の同じ日に出来事を表示します。"}

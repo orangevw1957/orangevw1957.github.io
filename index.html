@@ -65,7 +65,8 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   @media(min-width:601px){
     .picker-sheet{margin-top:105px}
   }
-  .calendar-date-trigger{position:relative;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:inherit;padding:8px 6px;line-height:1;min-height:44px;cursor:pointer}.calendar-date-trigger #monthPickerLabel{pointer-events:none}.calendar-date-trigger input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;margin:0;padding:0;cursor:pointer;z-index:2}
+
+  #monthPickerBtn{cursor:pointer}
 </style>
 </head>
 <body>
@@ -75,7 +76,8 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   <section class="card">
     <div class="row">
-      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><span class="calendar-date-trigger"><span id="monthPickerLabel">2026年8月</span><input id="calendarDatePicker" type="date" aria-label="年月日を選択"></span><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
+      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><button id="monthPickerBtn" type="button" style="border:0;background:transparent;font-weight:700;font-size:inherit;padding:8px 6px">2026年8月</button>
+      <input id="calendarDatePicker" type="date" aria-label="年月日を選択" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
     </div>
     <div id="cal" class="calendar" style="margin-top:10px"></div>
   </section>
@@ -163,10 +165,36 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
   function icon(t){return t==="birthday"?"🎂":t==="memorial"?"🕊️":t==="anniversary"?"🎉":"📅"}
   function onDate(y,m,d){return events.map(e=>({...e,calc:calc(e,y)})).filter(e=>sameMD(e,m,d)&&e.calc)}
-  const calendarDatePicker=$("calendarDatePicker"),monthPickerLabel=$("monthPickerLabel");
-  function syncCalendarDatePicker(){calendarDatePicker.value=`${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;monthPickerLabel.textContent=`${view.getFullYear()}年${view.getMonth()+1}月`;}
-  syncCalendarDatePicker();
-  calendarDatePicker.addEventListener("change",()=>{if(!calendarDatePicker.value)return;const d=parse(calendarDatePicker.value);selected={y:d.y,m:d.m,d:d.d};view=new Date(d.y,d.m,1);syncCalendarDatePicker();render()});
+
+  // v21: v12の「基準日」と同じ input[type=date] を使い、
+  // カレンダーの「2026年8月」からも同じ日付選択UIを起動する。
+  const calendarDatePicker=$("calendarDatePicker");
+  const monthPickerBtn=$("monthPickerBtn");
+
+  function calendarDateValue(){
+    return `${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;
+  }
+  function syncCalendarPicker(){
+    calendarDatePicker.value=calendarDateValue();
+    monthPickerBtn.textContent=`${view.getFullYear()}年${view.getMonth()+1}月`;
+  }
+
+  syncCalendarPicker();
+
+  monthPickerBtn.addEventListener("click",()=>{
+    calendarDatePicker.value=calendarDateValue();
+    calendarDatePicker.showPicker ? calendarDatePicker.showPicker() : calendarDatePicker.click();
+  });
+
+  calendarDatePicker.addEventListener("change",()=>{
+    if(!calendarDatePicker.value)return;
+    const d=parse(calendarDatePicker.value);
+    selected={y:d.y,m:d.m,d:d.d};
+    view=new Date(d.y,d.m,1);
+    syncCalendarPicker();
+    render();
+  });
+
   function render(){
     const y=view.getFullYear(),m=view.getMonth();
     $("monthPickerBtn").textContent=`${y}年${m+1}月`;
@@ -261,9 +289,9 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function hint(){const t=$("type").value;$("hint").textContent=t==="memorial"?"亡くなった日から一周忌・三回忌・七回忌などを自動表示します。":t==="birthday"?"生年月日から毎年の年齢を自動表示します。":t==="anniversary"?"基準日から毎年の周年を自動表示します。":"毎年の同じ日に出来事を表示します。"}
-  $("todayBtn").onclick=()=>{view=new Date(today.y,today.m,1);selected={...today};syncCalendarDatePicker();render()};
-  $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);syncCalendarDatePicker();render()};
-  $("next").onclick=()=>{view.setMonth(view.getMonth()+1);syncCalendarDatePicker();render()};
+  $("todayBtn").onclick=()=>{view=new Date(today.y,today.m,1);selected={...today};syncCalendarPicker();render()};
+  $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);syncCalendarPicker();render()};
+  $("next").onclick=()=>{view.setMonth(view.getMonth()+1);syncCalendarPicker();render()};
   
 
   const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"),

@@ -21,6 +21,25 @@ button,input,select{font:inherit}button{min-height:44px;border-radius:10px;borde
 label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccc;border-radius:10px;background:#fff}
 .hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:none;cursor:grab}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
 @media(max-width:420px){main{padding:12px}.day{min-height:68px;padding:4px}.event{font-size:10px}.card{padding:12px}}
+
+  #memorial-app .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:flex-end;justify-content:center}
+  #memorial-app .picker-sheet{width:min(100%,760px);background:#fff;border-radius:22px 22px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.15)}
+  #memorial-app .picker-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding-bottom:12px}
+  #memorial-app .picker-header strong{font-size:18px;text-align:center}
+  #memorial-app .picker-cancel,#memorial-app .picker-confirm{min-height:44px;border-radius:11px;padding:8px 14px}
+  #memorial-app .picker-cancel{justify-self:start;border:1px solid #ccc;background:#fff}
+  #memorial-app .picker-confirm{justify-self:end;background:#222;color:#fff;border:1px solid #222}
+  #memorial-app .wheel-labels{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;color:#777;font-weight:600;margin-bottom:4px}
+  #memorial-app .wheel-labels span{text-align:center}
+  #memorial-app .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px;height:270px;overflow:hidden}
+  #memorial-app .wheel-column{height:270px;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;padding:108px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #memorial-app .wheel-column::-webkit-scrollbar{display:none}
+  #memorial-app .wheel-option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:20px;color:#888;user-select:none}
+  #memorial-app .wheel-option.selected{font-size:24px;font-weight:700;color:#111}
+  #memorial-app .wheel-selection{position:absolute;left:0;right:0;top:108px;height:54px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;pointer-events:none;z-index:2}
+  #memorial-app .wheel-fade{position:absolute;left:0;right:0;top:0;height:270px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,rgba(255,255,255,.98),rgba(255,255,255,0) 28%,rgba(255,255,255,0) 72%,rgba(255,255,255,.98))}
+  #memorial-app .picker-help{text-align:center;color:#777;margin:12px 0 0;font-size:13px}
+  @media(max-width:480px){#memorial-app .picker-sheet{padding-left:12px;padding-right:12px}.picker-header strong{font-size:17px}}
 </style>
 </head>
 <body>
@@ -35,21 +54,23 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div id="cal" class="calendar" style="margin-top:10px"></div>
   </section>
 
-  <section id="monthPicker" class="card hidden">
-    <div class="row"><strong>年月を選択</strong><button id="closePicker" type="button">閉じる</button></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
-      <div>
-        <label for="wheelYear" class="muted">年</label>
-        <select id="wheelYear" size="5" style="width:100%;text-align:center"></select>
+  <div id="monthPicker" class="picker-overlay hidden" aria-hidden="true">
+    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <div class="picker-header">
+        <button id="cancelPicker" type="button" class="picker-cancel">キャンセル</button>
+        <strong id="pickerTitle">年と月を選択</strong>
+        <button id="applyWheel" type="button" class="picker-confirm">決定</button>
       </div>
-      <div>
-        <label for="wheelMonth" class="muted">月</label>
-        <select id="wheelMonth" size="5" style="width:100%;text-align:center"></select>
+      <div class="wheel-labels"><span>年</span><span>月</span></div>
+      <div class="wheel-wrap">
+        <div class="wheel-fade"></div>
+        <div class="wheel-selection"></div>
+        <div class="wheel-column" id="wheelYear"></div>
+        <div class="wheel-column" id="wheelMonth"></div>
       </div>
+      <p class="picker-help">上下にスワイプして年月を選択</p>
     </div>
-    <p class="muted" style="margin:10px 0 0;text-align:center">上下にスワイプして年月を選択</p>
-    <div style="display:flex;justify-content:center;margin-top:10px"><button id="applyWheel" type="button" class="primary">この年月に移動</button></div>
-  </section>
+  </div>
 
   <section class="card">
     <div class="row"><strong id="selectedTitle">今日の節目</strong><span id="count" class="muted"></span></div>
@@ -214,20 +235,48 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);render()};
   
   const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"), wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth");
-  function buildPicker(){
-    const cy=view.getFullYear(), cm=view.getMonth();
-    wheelYear.innerHTML="";
-    for(let y=1900;y<=2100;y++){const o=document.createElement("option");o.value=y;o.textContent=y+"年";if(y===cy)o.selected=true;wheelYear.appendChild(o)}
-    wheelMonth.innerHTML="";
-    for(let m=0;m<12;m++){const o=document.createElement("option");o.value=m;o.textContent=(m+1)+"月";if(m===cm)o.selected=true;wheelMonth.appendChild(o)}
-    wheelYear.scrollTop=Math.max(0,(cy-1900-2))*wheelYear.querySelector("option").offsetHeight;
-    wheelMonth.scrollTop=Math.max(0,(cm-2))*wheelMonth.querySelector("option").offsetHeight;
+  let pickerYear=view.getFullYear(), pickerMonth=view.getMonth();
+  function makeWheelOption(label,value,selected){
+    const el=document.createElement("div");
+    el.className="wheel-option"+(selected?" selected":"");
+    el.dataset.value=value; el.textContent=label; return el;
   }
-  monthBtn.onclick=()=>{buildPicker();picker.classList.toggle("hidden")};
-  $("closePicker").onclick=()=>picker.classList.add("hidden");
-  $("applyWheel").onclick=()=>{view=new Date(Number(wheelYear.value),Number(wheelMonth.value),1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");render()};
-  wheelYear.onchange=()=>{view.setFullYear(Number(wheelYear.value));};
-  wheelMonth.onchange=()=>{view.setMonth(Number(wheelMonth.value));};
+  function updateWheel(container){
+    const center=container.scrollTop+container.clientHeight/2;
+    let best=null,dist=Infinity;
+    [...container.children].forEach(el=>{
+      const c=el.offsetTop+el.offsetHeight/2,d=Math.abs(c-center);
+      el.classList.remove("selected");
+      if(d<dist){dist=d;best=el}
+    });
+    if(best){best.classList.add("selected");return Number(best.dataset.value)}
+    return null;
+  }
+  function buildPicker(){
+    pickerYear=view.getFullYear(); pickerMonth=view.getMonth();
+    wheelYear.innerHTML=""; wheelMonth.innerHTML="";
+    for(let y=1900;y<=2100;y++) wheelYear.appendChild(makeWheelOption(y+"年",y,y===pickerYear));
+    for(let m=0;m<12;m++) wheelMonth.appendChild(makeWheelOption((m+1)+"月",m,m===pickerMonth));
+    requestAnimationFrame(()=>{
+      wheelYear.scrollTop=(pickerYear-1900)*54;
+      wheelMonth.scrollTop=pickerMonth*54;
+      updateWheel(wheelYear); updateWheel(wheelMonth);
+    });
+  }
+  function watchWheel(el,isYear){
+    let timer=null;
+    el.addEventListener("scroll",()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>{
+        const v=updateWheel(el);
+        if(v!==null){if(isYear)pickerYear=v;else pickerMonth=v;}
+      },80);
+    });
+  }
+  watchWheel(wheelYear,true); watchWheel(wheelMonth,false);
+  monthBtn.onclick=()=>{buildPicker();picker.classList.remove("hidden");picker.setAttribute("aria-hidden","false")};
+  $("cancelPicker").onclick=()=>{picker.classList.add("hidden");picker.setAttribute("aria-hidden","true")};
+  $("applyWheel").onclick=()=>{view=new Date(pickerYear,pickerMonth,1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");render()};
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

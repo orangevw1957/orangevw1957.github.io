@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v30">
+<meta name="app-version" content="v31">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -170,7 +170,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   calendarDatePicker.addEventListener("change",()=>{if(!calendarDatePicker.value)return;const d=parse(calendarDatePicker.value);selected={y:d.y,m:d.m,d:d.d};view=new Date(d.y,d.m,1);syncCalendarDatePicker();render()});
   function render(){
     const y=view.getFullYear(),m=view.getMonth();
-    $("monthPickerLabel").textContent=`${y}年${m+1}月`;
+    $("monthPickerBtn").textContent=`${y}年${m+1}月`;
     $("cal").innerHTML=["日","月","火","水","木","金","土"].map(x=>`<div class="dow">${x}</div>`).join("");
     const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
     for(let i=0;i<first;i++)$("cal").insertAdjacentHTML("beforeend","<div></div>");
@@ -191,7 +191,13 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
   function renderList(){
     $("savedCount").textContent=events.length+"件";
-    const sorted=events.map((e,i)=>({e,i})).sort((a,b)=>b.e.date.localeCompare(a.e.date));
+
+    // 基準日の新しい順 → 古い順。元のevents配列は変更しない。
+    const sorted=events.map((e,i)=>({e,i})).sort((a,b)=>{
+      const byDate=b.e.date.localeCompare(a.e.date);
+      return byDate!==0 ? byDate : a.i-b.i;
+    });
+
     $("list").innerHTML=sorted.length
       ? sorted.map(({e,i})=>`<div class="item saved-item">
           <div><strong>${icon(e.type)} ${escapeHtml(e.name)}</strong></div>
@@ -199,8 +205,11 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
           <button type="button" data-del="${i}" style="margin-top:7px">削除</button>
         </div>`).join("")
       : `<p class="muted">まだ登録されていません。</p>`;
+
     document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-      events.splice(Number(b.dataset.del),1); save(); render();
+      events.splice(Number(b.dataset.del),1);
+      save();
+      render();
     });
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}

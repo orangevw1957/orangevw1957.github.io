@@ -35,14 +35,20 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div id="cal" class="calendar" style="margin-top:10px"></div>
   </section>
 
-  <section id="monthPicker" class="card hidden" style="position:relative">
+  <section id="monthPicker" class="card hidden">
     <div class="row"><strong>年月を選択</strong><button id="closePicker" type="button">閉じる</button></div>
-    <div class="row" style="margin-top:12px;gap:8px">
-      <button id="yearPrev" type="button">‹</button>
-      <select id="yearSelect" style="flex:1"></select>
-      <button id="yearNext" type="button">›</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      <div>
+        <label for="wheelYear" class="muted">年</label>
+        <select id="wheelYear" size="5" style="width:100%;text-align:center"></select>
+      </div>
+      <div>
+        <label for="wheelMonth" class="muted">月</label>
+        <select id="wheelMonth" size="5" style="width:100%;text-align:center"></select>
+      </div>
     </div>
-    <div id="monthChoices" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px"></div>
+    <p class="muted" style="margin:10px 0 0;text-align:center">上下にスワイプして年月を選択</p>
+    <div style="display:flex;justify-content:center;margin-top:10px"><button id="applyWheel" type="button" class="primary">この年月に移動</button></div>
   </section>
 
   <section class="card">
@@ -207,20 +213,21 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);render()};
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);render()};
   
-  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"), yearSelect=$("yearSelect"), monthChoices=$("monthChoices");
+  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"), wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth");
   function buildPicker(){
-    const cy=view.getFullYear();
-    yearSelect.innerHTML="";
-    for(let y=1900;y<=2100;y++){const o=document.createElement("option");o.value=y;o.textContent=y+"年";if(y===cy)o.selected=true;yearSelect.appendChild(o)}
-    monthChoices.innerHTML="";
-    for(let m=0;m<12;m++){const b=document.createElement("button");b.type="button";b.textContent=(m+1)+"月";if(m===view.getMonth())b.classList.add("primary");b.onclick=()=>{view=new Date(Number(yearSelect.value),m,1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");render()};monthChoices.appendChild(b)}
+    const cy=view.getFullYear(), cm=view.getMonth();
+    wheelYear.innerHTML="";
+    for(let y=1900;y<=2100;y++){const o=document.createElement("option");o.value=y;o.textContent=y+"年";if(y===cy)o.selected=true;wheelYear.appendChild(o)}
+    wheelMonth.innerHTML="";
+    for(let m=0;m<12;m++){const o=document.createElement("option");o.value=m;o.textContent=(m+1)+"月";if(m===cm)o.selected=true;wheelMonth.appendChild(o)}
+    wheelYear.scrollTop=Math.max(0,(cy-1900-2))*wheelYear.querySelector("option").offsetHeight;
+    wheelMonth.scrollTop=Math.max(0,(cm-2))*wheelMonth.querySelector("option").offsetHeight;
   }
   monthBtn.onclick=()=>{buildPicker();picker.classList.toggle("hidden")};
   $("closePicker").onclick=()=>picker.classList.add("hidden");
-  yearSelect.onchange=()=>{view=new Date(Number(yearSelect.value),view.getMonth(),1);buildPicker();render()};
-  $("yearPrev").onclick=()=>{view.setFullYear(view.getFullYear()-1);buildPicker();render()};
-  $("yearNext").onclick=()=>{view.setFullYear(view.getFullYear()+1);buildPicker();render()};
-
+  $("applyWheel").onclick=()=>{view=new Date(Number(wheelYear.value),Number(wheelMonth.value),1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");render()};
+  wheelYear.onchange=()=>{view.setFullYear(Number(wheelYear.value));};
+  wheelMonth.onchange=()=>{view.setMonth(Number(wheelMonth.value));};
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

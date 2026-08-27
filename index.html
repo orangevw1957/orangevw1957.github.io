@@ -22,43 +22,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 .hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:none;cursor:grab}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
 @media(max-width:420px){main{padding:12px}.day{min-height:68px;padding:4px}.event{font-size:10px}.card{padding:12px}}
 
-
-  /* v14: 基準日の見た目に統一した iPhone風 年月日ピッカー */
-  .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.34);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:0 12px}
-  .picker-overlay.hidden{display:none}
-  .picker-sheet{width:min(92vw,390px);margin-top:clamp(110px,18vh,180px);background:#111;color:#fff;border-radius:28px;padding:18px 16px 18px;box-shadow:0 18px 55px rgba(0,0,0,.45);overflow:hidden}
-  .ios-picker-top{height:48px;display:flex;align-items:center;padding:0 8px}
-  .ios-picker-top strong{font-size:20px;color:#4f8cff;font-weight:600}
-  .wheel-labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;color:#777;font-size:0;height:0;overflow:hidden}
-  .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;height:260px;overflow:hidden}
-  .wheel-column{height:260px;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;padding:103px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-y}
-  .wheel-column::-webkit-scrollbar{display:none}
-  .wheel-option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:20px;color:#555;user-select:none}
-  .wheel-option.selected{font-size:24px;font-weight:500;color:#f2f2f2}
-  .wheel-selection{position:absolute;left:8px;right:8px;top:103px;height:54px;border-radius:28px;background:#292929;pointer-events:none;z-index:1}
-  .wheel-fade{position:absolute;left:0;right:0;top:0;height:260px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,#111 0%,rgba(17,17,17,.92) 14%,rgba(17,17,17,0) 32%,rgba(17,17,17,0) 68%,rgba(17,17,17,.92) 86%,#111 100%)}
-  .wheel-column{position:relative;z-index:2}
-  .ios-picker-bottom{height:68px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px}
-  .picker-reset{min-height:54px;min-width:126px;border:0;border-radius:28px;background:#090909;color:#fff;font-size:18px;font-weight:600}
-  .picker-check{width:58px;height:58px;min-height:58px;border:0;border-radius:50%;background:#4f8cff;color:#fff;font-size:38px;line-height:58px;padding:0;font-weight:300}
-  @media(max-width:600px){
-    .picker-overlay{padding:0 10px}
-    .picker-sheet{width:min(88vw,360px);margin-top:clamp(105px,15vh,155px);border-radius:28px;padding:16px 12px 16px}
-    .ios-picker-top{height:44px;padding-left:10px}
-    .ios-picker-top strong{font-size:19px}
-    .wheel-wrap{height:250px}
-    .wheel-column{height:250px;padding:98px 0}
-    .wheel-selection{top:98px;height:54px;left:5px;right:5px}
-    .wheel-fade{height:250px}
-    .wheel-option{height:54px;font-size:19px}
-    .wheel-option.selected{font-size:23px}
-    .ios-picker-bottom{height:64px;padding:0 6px}
-    .picker-reset{min-width:118px;height:52px;min-height:52px;font-size:17px}
-    .picker-check{width:56px;height:56px;min-height:56px;font-size:36px;line-height:56px}
-  }
-  @media(min-width:601px){
-    .picker-sheet{margin-top:130px}
-  }
 </style>
 </head>
 <body>
@@ -68,40 +31,13 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   <section class="card">
     <div class="row">
-      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><button id="monthPickerBtn" type="button" style="border:0;background:transparent;font-weight:700;font-size:inherit;padding:8px 6px">2026年8月</button><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
+      <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><span style="position:relative;display:inline-block">
+        <button id="monthPickerBtn" type="button" style="border:0;background:transparent;font-weight:700;font-size:inherit;padding:8px 6px">2026年8月</button>
+        <input id="calendarDatePicker" type="date" aria-label="年月日を選択" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer">
+      </span><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
     </div>
     <div id="cal" class="calendar" style="margin-top:10px"></div>
   </section>
-
-  <div id="datePicker" class="picker-overlay hidden" aria-hidden="true">
-    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="datePickerTitle">
-      <div class="ios-picker-top"><strong id="datePickerTitle">2026年8月27日</strong></div>
-      <div class="wheel-labels"><span>年</span><span>月</span><span>日</span></div>
-      <div class="wheel-wrap">
-        <div class="wheel-fade"></div>
-        <div class="wheel-selection"></div>
-        <div class="wheel-column" id="dateWheelYear"></div>
-        <div class="wheel-column" id="dateWheelMonth"></div>
-        <div class="wheel-column" id="dateWheelDay"></div>
-      </div>
-      <div class="ios-picker-bottom"><button id="resetDatePicker" type="button" class="picker-reset">リセット</button><button id="applyDatePicker" type="button" class="picker-check" aria-label="決定">✓</button></div>
-    </div>
-  </div>
-
-  <div id="monthPicker" class="picker-overlay hidden" aria-hidden="true">
-    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
-      <div class="ios-picker-top"><strong id="pickerTitle">2026年8月27日</strong></div>
-      <div class="wheel-labels"><span>年</span><span>月</span><span>日</span></div>
-      <div class="wheel-wrap">
-        <div class="wheel-fade"></div>
-        <div class="wheel-selection"></div>
-        <div class="wheel-column" id="wheelYear"></div>
-        <div class="wheel-column" id="wheelMonth"></div>
-        <div class="wheel-column" id="wheelDay"></div>
-      </div>
-      <div class="ios-picker-bottom"><button id="resetPicker" type="button" class="picker-reset">リセット</button><button id="applyWheel" type="button" class="picker-check" aria-label="決定">✓</button></div>
-    </div>
-  </div>
 
   <section class="card">
     <div class="row"><strong id="selectedTitle">今日の節目</strong><span id="count" class="muted"></span></div>
@@ -121,8 +57,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       <label for="name">名前</label>
       <input id="name" required maxlength="40" placeholder="例：父、母、入社、結婚">
       <label for="date">基準日</label>
-      <button id="datePickerBtn" type="button" style="width:100%;text-align:left;padding:11px;border:1px solid #ccc;border-radius:10px;background:#fff">基準日を選択</button>
-      <input id="date" type="hidden" required>
+      <input id="date" type="date" required>
       <label for="memo">出来事・メモ</label>
       <input id="memo" maxlength="100" placeholder="任意">
       <div class="actions" style="margin-top:12px"><button class="primary" type="submit">保存</button><button id="cancel" type="button">キャンセル</button></div>
@@ -262,140 +197,36 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function hint(){const t=$("type").value;$("hint").textContent=t==="memorial"?"亡くなった日から一周忌・三回忌・七回忌などを自動表示します。":t==="birthday"?"生年月日から毎年の年齢を自動表示します。":t==="anniversary"?"基準日から毎年の周年を自動表示します。":"毎年の同じ日に出来事を表示します。"}
-  $("todayBtn").onclick=()=>{view=new Date(today.y,today.m,1);selected={...today};render()};
-  $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);render()};
-  $("next").onclick=()=>{view.setMonth(view.getMonth()+1);render()};
+  $("todayBtn").onclick=()=>{view=new Date(today.y,today.m,1);selected={...today};calendarDatePicker.value=selectedDateString();render()};
+  $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);calendarDatePicker.value=selectedDateString();render()};
+  $("next").onclick=()=>{view.setMonth(view.getMonth()+1);calendarDatePicker.value=selectedDateString();render()};
   
 
 
+  // v14: 「基準日」とカレンダーの年月日選択を同じ
+  // iPhone Safari の標準 input[type="date"] に統一。
+  const calendarDatePicker=$("calendarDatePicker");
 
-  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"),
-        wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth"), wheelDay=$("wheelDay");
-  const dateBtn=$("datePickerBtn"), datePicker=$("datePicker"),
-        dateWheelYear=$("dateWheelYear"), dateWheelMonth=$("dateWheelMonth"), dateWheelDay=$("dateWheelDay");
-  let calState={y:view.getFullYear(),m:view.getMonth(),d:selected.d||today.d};
-  let formState={y:today.y,m:today.m,d:today.d};
-  let calOriginal={...calState}, formOriginal={...formState};
-
-  function makeWheelOption(label,value,selected){
-    const el=document.createElement("div");
-    el.className="wheel-option"+(selected?" selected":"");
-    el.dataset.value=value;
-    el.textContent=label;
-    return el;
-  }
-  function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
-  function updateWheel(container){
-    const center=container.scrollTop+container.clientHeight/2;
-    let best=null,dist=Infinity;
-    [...container.children].forEach(el=>{
-      const c=el.offsetTop+el.offsetHeight/2,d=Math.abs(c-center);
-      el.classList.remove("selected");
-      if(d<dist){dist=d;best=el}
-    });
-    if(best){best.classList.add("selected");return Number(best.dataset.value)}
-    return null;
-  }
-  function setPickerTitle(id,state){
-    $(id).textContent=`${state.y}年${state.m+1}月${state.d}日`;
-  }
-  function fillWheels(state,wy,wm,wd,titleId){
-    const max=daysInMonth(state.y,state.m);
-    state.d=Math.min(state.d,max);
-    wy.innerHTML="";wm.innerHTML="";wd.innerHTML="";
-    for(let yy=1900;yy<=2100;yy++)wy.appendChild(makeWheelOption(yy+"年",yy,yy===state.y));
-    for(let mm=0;mm<12;mm++)wm.appendChild(makeWheelOption((mm+1)+"月",mm,mm===state.m));
-    for(let dd=1;dd<=max;dd++)wd.appendChild(makeWheelOption(dd+"日",dd,dd===state.d));
-    setPickerTitle(titleId,state);
-    requestAnimationFrame(()=>{
-      wy.scrollTop=(state.y-1900)*54;
-      wm.scrollTop=state.m*54;
-      wd.scrollTop=(state.d-1)*54;
-      updateWheel(wy);updateWheel(wm);updateWheel(wd);
-    });
-  }
-  function attachWheel(wy,wm,wd,state,titleId){
-    const timers=new Map();
-    function watch(el,key){
-      el.addEventListener("scroll",()=>{
-        clearTimeout(timers.get(el));
-        timers.set(el,setTimeout(()=>{
-          const v=updateWheel(el); if(v===null)return;
-          if(key==="y"){
-            state.y=v;
-            state.d=Math.min(state.d,daysInMonth(state.y,state.m));
-            fillWheels(state,wy,wm,wd,titleId);
-          }else if(key==="m"){
-            state.m=v;
-            state.d=Math.min(state.d,daysInMonth(state.y,state.m));
-            fillWheels(state,wy,wm,wd,titleId);
-          }else{
-            state.d=v;
-            setPickerTitle(titleId,state);
-          }
-        },70));
-      });
-    }
-    watch(wy,"y");watch(wm,"m");watch(wd,"d");
+  function selectedDateString(){
+    return `${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;
   }
 
-  attachWheel(wheelYear,wheelMonth,wheelDay,calState,"pickerTitle");
-  attachWheel(dateWheelYear,dateWheelMonth,dateWheelDay,formState,"datePickerTitle");
+  calendarDatePicker.value=selectedDateString();
 
-  function lockScroll(){document.body.style.overflow="hidden"}
-  function unlockScroll(){document.body.style.overflow=""}
-
-  function openCalendarPicker(){
-    calState={y:view.getFullYear(),m:view.getMonth(),d:selected.d||today.d};
-    calOriginal={...calState};
-    fillWheels(calState,wheelYear,wheelMonth,wheelDay,"pickerTitle");
-    picker.classList.remove("hidden");picker.setAttribute("aria-hidden","false");lockScroll();
-  }
-  monthBtn.onclick=openCalendarPicker;
-
-  $("resetPicker").onclick=()=>{
-    calState={...calOriginal};
-    fillWheels(calState,wheelYear,wheelMonth,wheelDay,"pickerTitle");
+  $("monthPickerBtn").onclick=()=>{
+    calendarDatePicker.value=selectedDateString();
+    calendarDatePicker.click();
   };
-  $("applyWheel").onclick=()=>{
-    selected={...calState};
-    view=new Date(calState.y,calState.m,1);
-    picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll();render();
-  };
-  picker.addEventListener("click",e=>{if(e.target===picker){picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll()}});
 
-  function openDatePicker(){
-    const current=$("date").value;
-    if(current){
-      const p=parse(current);formState={y:p.y,m:p.m,d:p.d};
-    }else{
-      const n=new Date();formState={y:n.getFullYear(),m:n.getMonth(),d:n.getDate()};
-    }
-    formOriginal={...formState};
-    fillWheels(formState,dateWheelYear,dateWheelMonth,dateWheelDay,"datePickerTitle");
-    datePicker.classList.remove("hidden");datePicker.setAttribute("aria-hidden","false");lockScroll();
-  }
-  dateBtn.onclick=openDatePicker;
-
-  $("resetDatePicker").onclick=()=>{
-    formState={...formOriginal};
-    fillWheels(formState,dateWheelYear,dateWheelMonth,dateWheelDay,"datePickerTitle");
-  };
-  $("applyDatePicker").onclick=()=>{
-    const value=`${formState.y}-${pad(formState.m+1)}-${pad(formState.d)}`;
-    $("date").value=value;
-    dateBtn.textContent=`${formState.y}年${formState.m+1}月${formState.d}日`;
-    datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll();
-  };
-  datePicker.addEventListener("click",e=>{if(e.target===datePicker){datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll()}});
-
-  document.addEventListener("keydown",e=>{
-    if(e.key==="Escape"){
-      if(!picker.classList.contains("hidden")){$("resetPicker").click();picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll()}
-      if(!datePicker.classList.contains("hidden")){$("resetDatePicker").click();datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll()}
-    }
+  calendarDatePicker.addEventListener("change",()=>{
+    if(!calendarDatePicker.value)return;
+    const d=parse(calendarDatePicker.value);
+    view=new Date(d.y,d.m,1);
+    selected={y:d.y,m:d.m,d:d.d};
+    render();
   });
-  $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();const p=parse($("date").value);formState={y:p.y,m:p.m,d:p.d};$("datePickerBtn").textContent=`${p.y}年${p.m+1}月${p.d}日`;hint()};
+
+  $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");
   $("type").onchange=hint;

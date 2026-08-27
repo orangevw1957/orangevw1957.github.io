@@ -22,48 +22,42 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 .hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:none;cursor:grab}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
 @media(max-width:420px){main{padding:12px}.day{min-height:68px;padding:4px}.event{font-size:10px}.card{padding:12px}}
 
-  .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:92px}.picker-overlay.hidden{display:none}
-  .picker-sheet{width:min(92vw,430px);background:#fff;border:1px solid #ddd;border-radius:18px;padding:14px 16px 16px;box-shadow:0 12px 40px rgba(0,0,0,.24);position:relative}
-  .picker-sheet::before{content:"";position:absolute;top:-9px;left:50%;width:18px;height:18px;background:#fff;border-left:1px solid #ddd;border-top:1px solid #ddd;transform:translateX(-50%) rotate(45deg)}
-  .picker-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding-bottom:10px;position:relative;z-index:1}
-  .picker-header strong{font-size:18px;text-align:center}
-  .picker-cancel,.picker-confirm{min-height:44px;border-radius:11px;padding:8px 14px}
-  .picker-cancel{justify-self:start;border:1px solid #ccc;background:#fff}
-  .picker-confirm{justify-self:end;background:#222;color:#fff;border:1px solid #222}
-  .wheel-labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px;color:#777;font-weight:600;margin-bottom:4px}
-  .wheel-labels span{text-align:center}
-  .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;height:250px;overflow:hidden}
-  .wheel-column{height:250px;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;padding:100px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .wheel-column::-webkit-scrollbar{display:none}
-  .wheel-option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:20px;color:#888;user-select:none}
-  .wheel-option.selected{font-size:24px;font-weight:700;color:#111}
-  .wheel-selection{position:absolute;left:0;right:0;top:100px;height:54px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;pointer-events:none;z-index:2}
-  .wheel-fade{position:absolute;left:0;right:0;top:0;height:250px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,rgba(255,255,255,.98),rgba(255,255,255,0) 28%,rgba(255,255,255,0) 72%,rgba(255,255,255,.98))}
-  .picker-help{text-align:center;color:#777;margin:12px 0 0;font-size:13px}
-  @media(max-width:480px){.picker-sheet{padding-left:12px;padding-right:12px}.picker-header strong{font-size:17px}}
 
-  /* v11: PC / iPhone 共通の中央ポップアップ */
-  .picker-overlay{padding:0 14px;align-items:flex-start;justify-content:center}
-  .picker-sheet{width:min(92vw,430px);margin-top:clamp(86px,12vh,145px)}
-  .wheel-wrap{height:250px;gap:8px}
-  .wheel-column{height:250px;padding:98px 0;touch-action:pan-y}
-  .wheel-selection{top:98px;height:54px}
-  .wheel-fade{height:250px}
+  /* v14: 基準日の見た目に統一した iPhone風 年月日ピッカー */
+  .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.34);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:0 12px}
+  .picker-overlay.hidden{display:none}
+  .picker-sheet{width:min(92vw,390px);margin-top:clamp(110px,18vh,180px);background:#111;color:#fff;border-radius:28px;padding:18px 16px 18px;box-shadow:0 18px 55px rgba(0,0,0,.45);overflow:hidden}
+  .ios-picker-top{height:48px;display:flex;align-items:center;padding:0 8px}
+  .ios-picker-top strong{font-size:20px;color:#4f8cff;font-weight:600}
+  .wheel-labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;color:#777;font-size:0;height:0;overflow:hidden}
+  .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;height:260px;overflow:hidden}
+  .wheel-column{height:260px;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;padding:103px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  .wheel-column::-webkit-scrollbar{display:none}
+  .wheel-option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:20px;color:#555;user-select:none}
+  .wheel-option.selected{font-size:24px;font-weight:500;color:#f2f2f2}
+  .wheel-selection{position:absolute;left:8px;right:8px;top:103px;height:54px;border-radius:28px;background:#292929;pointer-events:none;z-index:1}
+  .wheel-fade{position:absolute;left:0;right:0;top:0;height:260px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,#111 0%,rgba(17,17,17,.92) 14%,rgba(17,17,17,0) 32%,rgba(17,17,17,0) 68%,rgba(17,17,17,.92) 86%,#111 100%)}
+  .wheel-column{position:relative;z-index:2}
+  .ios-picker-bottom{height:68px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px}
+  .picker-reset{min-height:54px;min-width:126px;border:0;border-radius:28px;background:#090909;color:#fff;font-size:18px;font-weight:600}
+  .picker-check{width:58px;height:58px;min-height:58px;border:0;border-radius:50%;background:#4f8cff;color:#fff;font-size:38px;line-height:58px;padding:0;font-weight:300}
   @media(max-width:600px){
     .picker-overlay{padding:0 10px}
-    .picker-sheet{width:min(94vw,390px);margin-top:88px;border-radius:18px;padding:12px 12px calc(14px + env(safe-area-inset-bottom))}
-    .picker-header strong{font-size:17px}
-    .picker-cancel,.picker-confirm{min-height:42px;padding:7px 11px}
-    .wheel-wrap{height:238px;grid-template-columns:1fr 1fr 1fr;gap:5px}
-    .wheel-column{height:238px;padding:92px 0}
-    .wheel-selection{top:92px;height:54px}
-    .wheel-fade{height:238px}
+    .picker-sheet{width:min(88vw,360px);margin-top:clamp(105px,15vh,155px);border-radius:28px;padding:16px 12px 16px}
+    .ios-picker-top{height:44px;padding-left:10px}
+    .ios-picker-top strong{font-size:19px}
+    .wheel-wrap{height:250px}
+    .wheel-column{height:250px;padding:98px 0}
+    .wheel-selection{top:98px;height:54px;left:5px;right:5px}
+    .wheel-fade{height:250px}
     .wheel-option{height:54px;font-size:19px}
     .wheel-option.selected{font-size:23px}
-    .picker-help{font-size:12px;margin-top:10px}
+    .ios-picker-bottom{height:64px;padding:0 6px}
+    .picker-reset{min-width:118px;height:52px;min-height:52px;font-size:17px}
+    .picker-check{width:56px;height:56px;min-height:56px;font-size:36px;line-height:56px}
   }
   @media(min-width:601px){
-    .picker-sheet{margin-top:105px}
+    .picker-sheet{margin-top:130px}
   }
 </style>
 </head>
@@ -81,11 +75,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   <div id="datePicker" class="picker-overlay hidden" aria-hidden="true">
     <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="datePickerTitle">
-      <div class="picker-header">
-        <button id="cancelDatePicker" type="button" class="picker-cancel">キャンセル</button>
-        <strong id="datePickerTitle">年月日を選択</strong>
-        <button id="applyDatePicker" type="button" class="picker-confirm">決定</button>
-      </div>
+      <div class="ios-picker-top"><strong id="datePickerTitle">2026年8月27日</strong></div>
       <div class="wheel-labels"><span>年</span><span>月</span><span>日</span></div>
       <div class="wheel-wrap">
         <div class="wheel-fade"></div>
@@ -94,17 +84,13 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
         <div class="wheel-column" id="dateWheelMonth"></div>
         <div class="wheel-column" id="dateWheelDay"></div>
       </div>
-      <p class="picker-help">上下にスワイプして年月日を選択</p>
+      <div class="ios-picker-bottom"><button id="resetDatePicker" type="button" class="picker-reset">リセット</button><button id="applyDatePicker" type="button" class="picker-check" aria-label="決定">✓</button></div>
     </div>
   </div>
 
   <div id="monthPicker" class="picker-overlay hidden" aria-hidden="true">
     <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
-      <div class="picker-header">
-        <button id="cancelPicker" type="button" class="picker-cancel">キャンセル</button>
-        <strong id="pickerTitle">年月日を選択</strong>
-        <button id="applyWheel" type="button" class="picker-confirm">決定</button>
-      </div>
+      <div class="ios-picker-top"><strong id="pickerTitle">2026年8月27日</strong></div>
       <div class="wheel-labels"><span>年</span><span>月</span><span>日</span></div>
       <div class="wheel-wrap">
         <div class="wheel-fade"></div>
@@ -113,7 +99,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
         <div class="wheel-column" id="wheelMonth"></div>
         <div class="wheel-column" id="wheelDay"></div>
       </div>
-      <p class="picker-help">上下にスワイプして年月を選択</p>
+      <div class="ios-picker-bottom"><button id="resetPicker" type="button" class="picker-reset">リセット</button><button id="applyWheel" type="button" class="picker-check" aria-label="決定">✓</button></div>
     </div>
   </div>
 
@@ -282,17 +268,21 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   
 
 
+
   const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"),
         wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth"), wheelDay=$("wheelDay");
   const dateBtn=$("datePickerBtn"), datePicker=$("datePicker"),
         dateWheelYear=$("dateWheelYear"), dateWheelMonth=$("dateWheelMonth"), dateWheelDay=$("dateWheelDay");
-  let pickerYear=view.getFullYear(), pickerMonth=view.getMonth(), pickerDay=selected.d||today.d;
-  let formYear=today.y, formMonth=today.m, formDay=today.d;
+  let calState={y:view.getFullYear(),m:view.getMonth(),d:selected.d||today.d};
+  let formState={y:today.y,m:today.m,d:today.d};
+  let calOriginal={...calState}, formOriginal={...formState};
 
   function makeWheelOption(label,value,selected){
     const el=document.createElement("div");
     el.className="wheel-option"+(selected?" selected":"");
-    el.dataset.value=value; el.textContent=label; return el;
+    el.dataset.value=value;
+    el.textContent=label;
+    return el;
   }
   function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
   function updateWheel(container){
@@ -306,80 +296,106 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     if(best){best.classList.add("selected");return Number(best.dataset.value)}
     return null;
   }
-  function fillWheels(y,m,d,wy,wm,wd){
+  function setPickerTitle(id,state){
+    $(id).textContent=`${state.y}年${state.m+1}月${state.d}日`;
+  }
+  function fillWheels(state,wy,wm,wd,titleId){
+    const max=daysInMonth(state.y,state.m);
+    state.d=Math.min(state.d,max);
     wy.innerHTML="";wm.innerHTML="";wd.innerHTML="";
-    for(let yy=1900;yy<=2100;yy++)wy.appendChild(makeWheelOption(yy+"年",yy,yy===y));
-    for(let mm=0;mm<12;mm++)wm.appendChild(makeWheelOption((mm+1)+"月",mm,mm===m));
-    const max=daysInMonth(y,m), day=Math.min(d,max);
-    for(let dd=1;dd<=max;dd++)wd.appendChild(makeWheelOption(dd+"日",dd,dd===day));
+    for(let yy=1900;yy<=2100;yy++)wy.appendChild(makeWheelOption(yy+"年",yy,yy===state.y));
+    for(let mm=0;mm<12;mm++)wm.appendChild(makeWheelOption((mm+1)+"月",mm,mm===state.m));
+    for(let dd=1;dd<=max;dd++)wd.appendChild(makeWheelOption(dd+"日",dd,dd===state.d));
+    setPickerTitle(titleId,state);
     requestAnimationFrame(()=>{
-      wy.scrollTop=(y-1900)*54;wm.scrollTop=m*54;wd.scrollTop=(day-1)*54;
+      wy.scrollTop=(state.y-1900)*54;
+      wm.scrollTop=state.m*54;
+      wd.scrollTop=(state.d-1)*54;
       updateWheel(wy);updateWheel(wm);updateWheel(wd);
     });
-    return day;
   }
-  function attachWheel(wy,wm,wd,state){
+  function attachWheel(wy,wm,wd,state,titleId){
     const timers=new Map();
     function watch(el,key){
       el.addEventListener("scroll",()=>{
         clearTimeout(timers.get(el));
         timers.set(el,setTimeout(()=>{
           const v=updateWheel(el); if(v===null)return;
-          if(key==="y"){state.y=v;state.d=Math.min(state.d,daysInMonth(state.y,state.m));state.rebuild()}
-          if(key==="m"){state.m=v;state.d=Math.min(state.d,daysInMonth(state.y,state.m));state.rebuild()}
-          if(key==="d")state.d=v;
-        },80));
+          if(key==="y"){
+            state.y=v;
+            state.d=Math.min(state.d,daysInMonth(state.y,state.m));
+            fillWheels(state,wy,wm,wd,titleId);
+          }else if(key==="m"){
+            state.m=v;
+            state.d=Math.min(state.d,daysInMonth(state.y,state.m));
+            fillWheels(state,wy,wm,wd,titleId);
+          }else{
+            state.d=v;
+            setPickerTitle(titleId,state);
+          }
+        },70));
       });
     }
     watch(wy,"y");watch(wm,"m");watch(wd,"d");
   }
-  const calState={y:pickerYear,m:pickerMonth,d:pickerDay,rebuild(){
-    this.d=fillWheels(this.y,this.m,this.d,wheelYear,wheelMonth,wheelDay);
-  }};
-  attachWheel(wheelYear,wheelMonth,wheelDay,calState);
+
+  attachWheel(wheelYear,wheelMonth,wheelDay,calState,"pickerTitle");
+  attachWheel(dateWheelYear,dateWheelMonth,dateWheelDay,formState,"datePickerTitle");
+
+  function lockScroll(){document.body.style.overflow="hidden"}
+  function unlockScroll(){document.body.style.overflow=""}
 
   function openCalendarPicker(){
-    calState.y=view.getFullYear();calState.m=view.getMonth();calState.d=selected.d||1;
-    fillWheels(calState.y,calState.m,calState.d,wheelYear,wheelMonth,wheelDay);
-    picker.classList.remove("hidden");picker.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+    calState={y:view.getFullYear(),m:view.getMonth(),d:selected.d||today.d};
+    calOriginal={...calState};
+    fillWheels(calState,wheelYear,wheelMonth,wheelDay,"pickerTitle");
+    picker.classList.remove("hidden");picker.setAttribute("aria-hidden","false");lockScroll();
   }
   monthBtn.onclick=openCalendarPicker;
-  $("cancelPicker").onclick=()=>{
-    picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow="";
-  };
-  picker.addEventListener("click",e=>{if(e.target===picker)$("cancelPicker").click()});
-  $("applyWheel").onclick=()=>{
-    view=new Date(calState.y,calState.m,1);selected={y:calState.y,m:calState.m,d:calState.d};
-    picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow="";render();
-  };
 
-  const formState={y:formYear,m:formMonth,d:formDay,rebuild(){
-    this.d=fillWheels(this.y,this.m,this.d,dateWheelYear,dateWheelMonth,dateWheelDay);
-  }};
-  attachWheel(dateWheelYear,dateWheelMonth,dateWheelDay,formState);
+  $("resetPicker").onclick=()=>{
+    calState={...calOriginal};
+    fillWheels(calState,wheelYear,wheelMonth,wheelDay,"pickerTitle");
+  };
+  $("applyWheel").onclick=()=>{
+    selected={...calState};
+    view=new Date(calState.y,calState.m,1);
+    picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll();render();
+  };
+  picker.addEventListener("click",e=>{if(e.target===picker){picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll()}});
 
   function openDatePicker(){
     const current=$("date").value;
     if(current){
-      const p=parse(current);formState.y=p.y;formState.m=p.m;formState.d=p.d;
+      const p=parse(current);formState={y:p.y,m:p.m,d:p.d};
     }else{
-      const n=new Date();formState.y=n.getFullYear();formState.m=n.getMonth();formState.d=n.getDate();
+      const n=new Date();formState={y:n.getFullYear(),m:n.getMonth(),d:n.getDate()};
     }
-    fillWheels(formState.y,formState.m,formState.d,dateWheelYear,dateWheelMonth,dateWheelDay);
-    datePicker.classList.remove("hidden");datePicker.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+    formOriginal={...formState};
+    fillWheels(formState,dateWheelYear,dateWheelMonth,dateWheelDay,"datePickerTitle");
+    datePicker.classList.remove("hidden");datePicker.setAttribute("aria-hidden","false");lockScroll();
   }
   dateBtn.onclick=openDatePicker;
-  $("cancelDatePicker").onclick=()=>{
-    datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");document.body.style.overflow="";
+
+  $("resetDatePicker").onclick=()=>{
+    formState={...formOriginal};
+    fillWheels(formState,dateWheelYear,dateWheelMonth,dateWheelDay,"datePickerTitle");
   };
-  datePicker.addEventListener("click",e=>{if(e.target===datePicker)$("cancelDatePicker").click()});
   $("applyDatePicker").onclick=()=>{
     const value=`${formState.y}-${pad(formState.m+1)}-${pad(formState.d)}`;
     $("date").value=value;
     dateBtn.textContent=`${formState.y}年${formState.m+1}月${formState.d}日`;
-    datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");document.body.style.overflow="";
+    datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll();
   };
-  $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();const p=parse($("date").value);formState.y=p.y;formState.m=p.m;formState.d=p.d;$("datePickerBtn").textContent=`${p.y}年${p.m+1}月${p.d}日`;hint()};
+  datePicker.addEventListener("click",e=>{if(e.target===datePicker){datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll()}});
+
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){
+      if(!picker.classList.contains("hidden")){$("resetPicker").click();picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");unlockScroll()}
+      if(!datePicker.classList.contains("hidden")){$("resetDatePicker").click();datePicker.classList.add("hidden");datePicker.setAttribute("aria-hidden","true");unlockScroll()}
+    }
+  });
+  $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();const p=parse($("date").value);formState={y:p.y,m:p.m,d:p.d};$("datePickerBtn").textContent=`${p.y}年${p.m+1}月${p.d}日`;hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");
   $("type").onchange=hint;

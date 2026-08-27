@@ -36,7 +36,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div class="row">
       <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><span class="calendar-date-trigger">
         <span id="monthPickerLabel">2026年8月</span>
-        <input id="calendarDatePicker" type="date" aria-label="年月日を選択">
+        <input id="calendarDatePicker" type="date" aria-label="年月日を選択" inputmode="numeric">
       </span><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
     </div>
     <div id="cal" class="calendar" style="margin-top:10px"></div>
@@ -60,7 +60,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       <label for="name">名前</label>
       <input id="name" required maxlength="40" placeholder="例：父、母、入社、結婚">
       <label for="date">基準日</label>
-      <input id="date" type="date" required>
+      <input id="date" type="date" required aria-label="基準日（年月日）">
       <label for="memo">出来事・メモ</label>
       <input id="memo" maxlength="100" placeholder="任意">
       <div class="actions" style="margin-top:12px"><button class="primary" type="submit">保存</button><button id="cancel" type="button">キャンセル</button></div>
@@ -205,15 +205,20 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);syncCalendarDatePicker();render()};
   
 
-  // 「2026年8月」をタップすると、基準日と同じiPhone標準の年月日ピッカーを開く。
+  // カレンダーの年月表示をタップすると、iOS標準の年月日ピッカーを開く。
   const calendarDatePicker=$("calendarDatePicker");
   const monthPickerLabel=$("monthPickerLabel");
-  function selectedDateString(){return `${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;}
+
+  function selectedDateString(){
+    return `${selected.y}-${pad(selected.m+1)}-${pad(selected.d)}`;
+  }
   function syncCalendarDatePicker(){
     calendarDatePicker.value=selectedDateString();
     monthPickerLabel.textContent=`${selected.y}年${selected.m+1}月`;
   }
+
   syncCalendarDatePicker();
+
   calendarDatePicker.addEventListener("change",()=>{
     if(!calendarDatePicker.value)return;
     const d=parse(calendarDatePicker.value);
@@ -222,6 +227,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     syncCalendarDatePicker();
     render();
   });
+
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

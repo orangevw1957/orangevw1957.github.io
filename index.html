@@ -30,9 +30,9 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   .picker-cancel,.picker-confirm{min-height:44px;border-radius:11px;padding:8px 14px}
   .picker-cancel{justify-self:start;border:1px solid #ccc;background:#fff}
   .picker-confirm{justify-self:end;background:#222;color:#fff;border:1px solid #222}
-  .wheel-labels{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;color:#777;font-weight:600;margin-bottom:4px}
+  .wheel-labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px;color:#777;font-weight:600;margin-bottom:4px}
   .wheel-labels span{text-align:center}
-  .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;height:250px;overflow:hidden}
+  .wheel-wrap{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;height:250px;overflow:hidden}
   .wheel-column{height:250px;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;padding:100px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .wheel-column::-webkit-scrollbar{display:none}
   .wheel-option{height:54px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:20px;color:#888;user-select:none}
@@ -54,7 +54,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     .picker-sheet{width:min(94vw,390px);margin-top:88px;border-radius:18px;padding:12px 12px calc(14px + env(safe-area-inset-bottom))}
     .picker-header strong{font-size:17px}
     .picker-cancel,.picker-confirm{min-height:42px;padding:7px 11px}
-    .wheel-wrap{height:238px;grid-template-columns:1fr 1fr;gap:7px}
+    .wheel-wrap{height:238px;grid-template-columns:1fr 1fr 1fr;gap:5px}
     .wheel-column{height:238px;padding:92px 0}
     .wheel-selection{top:92px;height:54px}
     .wheel-fade{height:238px}
@@ -83,15 +83,16 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
       <div class="picker-header">
         <button id="cancelPicker" type="button" class="picker-cancel">キャンセル</button>
-        <strong id="pickerTitle">年と月を選択</strong>
+        <strong id="pickerTitle">年月日を選択</strong>
         <button id="applyWheel" type="button" class="picker-confirm">決定</button>
       </div>
-      <div class="wheel-labels"><span>年</span><span>月</span></div>
+      <div class="wheel-labels"><span>年</span><span>月</span><span>日</span></div>
       <div class="wheel-wrap">
         <div class="wheel-fade"></div>
         <div class="wheel-selection"></div>
         <div class="wheel-column" id="wheelYear"></div>
         <div class="wheel-column" id="wheelMonth"></div>
+        <div class="wheel-column" id="wheelDay"></div>
       </div>
       <p class="picker-help">上下にスワイプして年月を選択</p>
     </div>
@@ -259,13 +260,19 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);render()};
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);render()};
   
-  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"), wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth");
-  let pickerYear=view.getFullYear(), pickerMonth=view.getMonth();
+
+  const monthBtn=$("monthPickerBtn"), picker=$("monthPicker"),
+        wheelYear=$("wheelYear"), wheelMonth=$("wheelMonth"), wheelDay=$("wheelDay");
+  let pickerYear=view.getFullYear(), pickerMonth=view.getMonth(), pickerDay=selected.d||new Date().getDate();
+
   function makeWheelOption(label,value,selected){
     const el=document.createElement("div");
     el.className="wheel-option"+(selected?" selected":"");
     el.dataset.value=value; el.textContent=label; return el;
   }
+
+  function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+
   function updateWheel(container){
     const center=container.scrollTop+container.clientHeight/2;
     let best=null,dist=Infinity;
@@ -277,33 +284,98 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     if(best){best.classList.add("selected");return Number(best.dataset.value)}
     return null;
   }
+
+  function rebuildDays(){
+    const max=daysInMonth(pickerYear,pickerMonth);
+    if(pickerDay>max) pickerDay=max;
+    wheelDay.innerHTML="";
+    for(let d=1;d<=max;d++) wheelDay.appendChild(makeWheelOption(d+"日",d,d===pickerDay));
+    requestAnimationFrame(()=>{
+      wheelDay.scrollTop=(pickerDay-1)*54;
+      updateWheel(wheelDay);
+    });
+  }
+
   function buildPicker(){
-    pickerYear=view.getFullYear(); pickerMonth=view.getMonth();
-    wheelYear.innerHTML=""; wheelMonth.innerHTML="";
+    pickerYear=view.getFullYear();
+    pickerMonth=view.getMonth();
+    pickerDay=selected.d || 1;
+
+    const max=daysInMonth(pickerYear,pickerMonth);
+    if(pickerDay>max) pickerDay=max;
+
+    wheelYear.innerHTML=""; wheelMonth.innerHTML=""; wheelDay.innerHTML="";
     for(let y=1900;y<=2100;y++) wheelYear.appendChild(makeWheelOption(y+"年",y,y===pickerYear));
     for(let m=0;m<12;m++) wheelMonth.appendChild(makeWheelOption((m+1)+"月",m,m===pickerMonth));
+    for(let d=1;d<=max;d++) wheelDay.appendChild(makeWheelOption(d+"日",d,d===pickerDay));
+
     requestAnimationFrame(()=>{
       wheelYear.scrollTop=(pickerYear-1900)*54;
       wheelMonth.scrollTop=pickerMonth*54;
-      updateWheel(wheelYear); updateWheel(wheelMonth);
+      wheelDay.scrollTop=(pickerDay-1)*54;
+      updateWheel(wheelYear); updateWheel(wheelMonth); updateWheel(wheelDay);
     });
   }
-  function watchWheel(el,isYear){
+
+  function watchWheel(el,isYear,isMonth){
     let timer=null;
     el.addEventListener("scroll",()=>{
       clearTimeout(timer);
       timer=setTimeout(()=>{
         const v=updateWheel(el);
-        if(v!==null){if(isYear)pickerYear=v;else pickerMonth=v;}
+        if(v===null)return;
+        if(isYear){
+          pickerYear=v;
+          const oldDay=pickerDay;
+          rebuildDays();
+          pickerDay=Math.min(oldDay,daysInMonth(pickerYear,pickerMonth));
+          requestAnimationFrame(()=>{wheelDay.scrollTop=(pickerDay-1)*54;updateWheel(wheelDay)});
+        }else if(isMonth){
+          pickerMonth=v;
+          const oldDay=pickerDay;
+          rebuildDays();
+          pickerDay=Math.min(oldDay,daysInMonth(pickerYear,pickerMonth));
+          requestAnimationFrame(()=>{wheelDay.scrollTop=(pickerDay-1)*54;updateWheel(wheelDay)});
+        }else{
+          pickerDay=v;
+        }
       },80);
     });
   }
-  watchWheel(wheelYear,true); watchWheel(wheelMonth,false);
-  monthBtn.onclick=()=>{buildPicker();picker.classList.remove("hidden");picker.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"};
-  $("cancelPicker").onclick=()=>{picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow=""};
-  picker.addEventListener("click",e=>{if(e.target===picker){$("cancelPicker").click()}});
-  $("applyWheel").onclick=()=>{view=new Date(pickerYear,pickerMonth,1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow="";render()};
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!picker.classList.contains("hidden"))$("cancelPicker").click()});
+
+  watchWheel(wheelYear,true,false);
+  watchWheel(wheelMonth,false,true);
+  watchWheel(wheelDay,false,false);
+
+  monthBtn.onclick=()=>{
+    buildPicker();
+    picker.classList.remove("hidden");
+    picker.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+  };
+
+  $("cancelPicker").onclick=()=>{
+    picker.classList.add("hidden");
+    picker.setAttribute("aria-hidden","true");
+    document.body.style.overflow="";
+  };
+
+  picker.addEventListener("click",e=>{
+    if(e.target===picker) $("cancelPicker").click();
+  });
+
+  $("applyWheel").onclick=()=>{
+    selected={y:pickerYear,m:pickerMonth,d:pickerDay};
+    view=new Date(pickerYear,pickerMonth,1);
+    picker.classList.add("hidden");
+    picker.setAttribute("aria-hidden","true");
+    document.body.style.overflow="";
+    render();
+  };
+
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"&&!picker.classList.contains("hidden")) $("cancelPicker").click();
+  });
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

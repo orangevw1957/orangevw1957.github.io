@@ -41,6 +41,30 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   .wheel-fade{position:absolute;left:0;right:0;top:0;height:250px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,rgba(255,255,255,.98),rgba(255,255,255,0) 28%,rgba(255,255,255,0) 72%,rgba(255,255,255,.98))}
   .picker-help{text-align:center;color:#777;margin:12px 0 0;font-size:13px}
   @media(max-width:480px){.picker-sheet{padding-left:12px;padding-right:12px}.picker-header strong{font-size:17px}}
+
+  /* v11: PC / iPhone 共通の中央ポップアップ */
+  .picker-overlay{padding:0 14px;align-items:flex-start;justify-content:center}
+  .picker-sheet{width:min(92vw,430px);margin-top:clamp(86px,12vh,145px)}
+  .wheel-wrap{height:250px;gap:8px}
+  .wheel-column{height:250px;padding:98px 0;touch-action:pan-y}
+  .wheel-selection{top:98px;height:54px}
+  .wheel-fade{height:250px}
+  @media(max-width:600px){
+    .picker-overlay{padding:0 10px}
+    .picker-sheet{width:min(94vw,390px);margin-top:88px;border-radius:18px;padding:12px 12px calc(14px + env(safe-area-inset-bottom))}
+    .picker-header strong{font-size:17px}
+    .picker-cancel,.picker-confirm{min-height:42px;padding:7px 11px}
+    .wheel-wrap{height:238px;grid-template-columns:1fr 1fr;gap:7px}
+    .wheel-column{height:238px;padding:92px 0}
+    .wheel-selection{top:92px;height:54px}
+    .wheel-fade{height:238px}
+    .wheel-option{height:54px;font-size:19px}
+    .wheel-option.selected{font-size:23px}
+    .picker-help{font-size:12px;margin-top:10px}
+  }
+  @media(min-width:601px){
+    .picker-sheet{margin-top:105px}
+  }
 </style>
 </head>
 <body>
@@ -279,6 +303,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   $("cancelPicker").onclick=()=>{picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow=""};
   picker.addEventListener("click",e=>{if(e.target===picker){$("cancelPicker").click()}});
   $("applyWheel").onclick=()=>{view=new Date(pickerYear,pickerMonth,1);selected={y:view.getFullYear(),m:view.getMonth(),d:1};picker.classList.add("hidden");picker.setAttribute("aria-hidden","true");document.body.style.overflow="";render()};
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!picker.classList.contains("hidden"))$("cancelPicker").click()});
   $("toggleForm").onclick=()=>{$("form").classList.toggle("hidden");$("date").value=dateStr();hint()};
   $("savedToggle").onclick=()=>{$("savedBody").classList.toggle("hidden");$("savedArrow").textContent=$("savedBody").classList.contains("hidden")?"▶":"▼"};
   $("cancel").onclick=()=>$("form").classList.add("hidden");

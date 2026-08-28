@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v2.9">
+<meta name="app-version" content="v3.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -78,7 +78,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div class="row">
       <button id="prev" type="button">‹</button><div style="display:flex;align-items:center;gap:8px"><span class="calendar-date-trigger"><span id="monthPickerLabel">2026年8月</span><input id="calendarDatePicker" type="date" aria-label="年月日を選択"></span><button id="todayBtn" type="button">本日</button></div><button id="next" type="button">›</button>
     </div>
-    <div id="cal" class="calendar" style="margin-top:10px"></div>
+    <div id="cal" class="calendar" style="margin-top:10px"><div></div><div></div><div></div><div></div><div></div><div></div><button type="button" class="day"><strong>1</strong></button><button type="button" class="day"><strong>2</strong></button><button type="button" class="day"><strong>3</strong></button><button type="button" class="day"><strong>4</strong></button><button type="button" class="day"><strong>5</strong></button><button type="button" class="day"><strong>6</strong></button><button type="button" class="day"><strong>7</strong></button><button type="button" class="day"><strong>8</strong></button><button type="button" class="day"><strong>9</strong></button><button type="button" class="day"><strong>10</strong></button><button type="button" class="day"><strong>11</strong></button><button type="button" class="day"><strong>12</strong></button><button type="button" class="day"><strong>13</strong></button><button type="button" class="day"><strong>14</strong></button><button type="button" class="day"><strong>15</strong></button><button type="button" class="day"><strong>16</strong></button><button type="button" class="day"><strong>17</strong></button><button type="button" class="day"><strong>18</strong></button><button type="button" class="day"><strong>19</strong></button><button type="button" class="day"><strong>20</strong></button><button type="button" class="day"><strong>21</strong></button><button type="button" class="day"><strong>22</strong></button><button type="button" class="day"><strong>23</strong></button><button type="button" class="day"><strong>24</strong></button><button type="button" class="day"><strong>25</strong></button><button type="button" class="day"><strong>26</strong></button><button type="button" class="day"><strong>27</strong></button><button type="button" class="day today selected"><strong>28</strong></button><button type="button" class="day"><strong>29</strong></button><button type="button" class="day"><strong>30</strong></button><button type="button" class="day"><strong>31</strong></button><div></div><div></div><div></div><div></div><div></div></div>
   </section>
 
   <div id="monthPicker" class="picker-overlay hidden" aria-hidden="true">
@@ -369,6 +369,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   render();
 })();
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js?v=3.0').catch(()=>{});}</script>
 </body>
 </html>

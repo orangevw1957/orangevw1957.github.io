@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v3.9">
+<meta name="app-version" content="v3.91">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -173,7 +173,8 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       const weddingNames={1:"紙婚式",2:"藁婚式",3:"革婚式",4:"花婚式",5:"木婚式",6:"鉄婚式",7:"銅婚式",8:"青銅婚式",9:"陶器婚式",10:"錫婚式",11:"鋼鉄婚式",12:"絹婚式",13:"レース婚式",14:"象牙婚式",15:"水晶婚式",20:"磁器婚式",25:"銀婚式",30:"真珠婚式",35:"珊瑚婚式",40:"ルビー婚式",45:"サファイア婚式",50:"金婚式",55:"エメラルド婚式",60:"ダイヤモンド婚式",65:"ブルースターサファイア婚式",70:"プラチナ婚式"};
       return weddingNames[n] ? `${n}周年・${weddingNames[n]}` : `${n}周年`;
     }
-    if(e.type==="anniversary" || e.type==="work" || e.type==="business")return n>0?n+"周年":"当日";
+    if(e.type==="anniversary" || e.type==="work" || e.type==="business")
+      return n>0?n+"周年":"当日";
     if(e.type==="memorial"){
       if(n===1)return "一周忌";
       const map={2:"三回忌",6:"七回忌",12:"十三回忌",16:"十七回忌",22:"二十三回忌",26:"二十七回忌",32:"三十三回忌",36:"三十七回忌",49:"五十回忌"};
@@ -187,7 +188,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       work:"💼", business:"🏢", pet:"🐕", meeting:"❤️", memory:"⭐", other:"📅"
     };
     return icons[t] || "📅";
-  }).sort((a,b)=>a.d-b.d);
   }
 
   function renderUpcoming(){

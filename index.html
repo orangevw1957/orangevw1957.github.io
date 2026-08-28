@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v3.91">
+<meta name="app-version" content="v4.00">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -180,14 +180,11 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       const map={2:"三回忌",6:"七回忌",12:"十三回忌",16:"十七回忌",22:"二十三回忌",26:"二十七回忌",32:"三十三回忌",36:"三十七回忌",49:"五十回忌"};
       return map[n]||"";
     }
-    return n>0?n+"年目":"";
+    return "";
   }
   function icon(t){
-    const icons={
-      birthday:"🎂", wedding:"💍", anniversary:"📅", memorial:"🕊️",
-      work:"💼", business:"🏢", pet:"🐕", meeting:"❤️", memory:"⭐", other:"📅"
-    };
-    return icons[t] || "📅";
+    const icons={birthday:"🎂",wedding:"💍",anniversary:"📅",memorial:"🕊️",work:"💼",business:"🏢",pet:"🐕",meeting:"❤️",memory:"⭐",other:"📅"};
+    return icons[t]||"📅";
   }
 
   function renderUpcoming(){

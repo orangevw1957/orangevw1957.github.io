@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">\n<meta name="app-version" content="v3.1">
-<meta name="app-version" content="v3.0">
+<meta name="theme-color" content="#ffffff">
+<meta name="app-version" content="v3.4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -113,6 +113,10 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <div class="row"><strong id="yearListTitle">2026年の節目</strong></div>
     <div id="yearList"></div>
   </section>
+  <section class="card">
+    <div class="row"><strong>自動節目</strong></div>
+    <div id="autoMilestones" class="muted">誕生日や結婚記念日を登録すると、自動で特別な節目を表示します。</div>
+  </section>
 
   <section class="card">
     <div class="row"><strong>出来事を登録</strong><button id="toggleForm">＋ 登録</button></div>
@@ -121,6 +125,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
       <select id="type">
         <option value="birthday">誕生日</option>
         <option value="anniversary">周年・記念日</option>
+        <option value="wedding">結婚記念日</option>
         <option value="memorial">回忌</option>
         <option value="other">その他</option>
       </select>
@@ -163,7 +168,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     const n=years(e,y);
     if(n<0)return "";
     if(e.type==="birthday")return n+"歳";
-    if(e.type==="anniversary")return n>0?n+"周年":"当日";
+    if(e.type==="anniversary" || e.type==="wedding")return n>0?n+"周年":"当日";
     if(e.type==="memorial"){
       if(n===1)return "一周忌";
       const map={2:"三回忌",6:"七回忌",12:"十三回忌",16:"十七回忌",22:"二十三回忌",26:"二十七回忌",32:"三十三回忌",36:"三十七回忌",49:"五十回忌"};
@@ -235,6 +240,60 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     }).join("");
   }
 
+
+  const longevityMilestones = {
+    60:"還暦", 70:"古希", 77:"喜寿", 80:"傘寿",
+    88:"米寿", 90:"卒寿", 99:"白寿", 100:"百寿"
+  };
+
+  const weddingMilestones = {
+    1:"紙婚式", 2:"藁婚式", 3:"革婚式", 4:"花婚式",
+    5:"木婚式", 6:"鉄婚式", 7:"銅婚式", 8:"青銅婚式",
+    9:"陶器婚式", 10:"錫婚式", 11:"鋼鉄婚式", 12:"絹婚式",
+    13:"レース婚式", 14:"象牙婚式", 15:"水晶婚式",
+    20:"磁器婚式", 25:"銀婚式", 30:"真珠婚式",
+    35:"珊瑚婚式", 40:"ルビー婚式", 45:"サファイア婚式",
+    50:"金婚式", 55:"エメラルド婚式", 60:"ダイヤモンド婚式",
+    65:"ブルースターサファイア婚式", 70:"プラチナ婚式"
+  };
+
+  function renderAutoMilestones(){
+    const rows=[];
+    const currentYear=view.getFullYear();
+
+    events.forEach(e=>{
+      const b=parse(e.date);
+      if(e.type==="birthday"){
+        Object.entries(longevityMilestones).forEach(([age,name])=>{
+          const year=b.y+Number(age);
+          if(year>=currentYear-1){
+            rows.push({year, month:b.m, day:b.d, name:e.name,
+              label:`${age}歳・${name}`, icon:"🎂"});
+          }
+        });
+      }
+
+      if(e.type==="wedding"){
+        Object.entries(weddingMilestones).forEach(([years,name])=>{
+          const year=b.y+Number(years);
+          if(year>=currentYear-1){
+            rows.push({year, month:b.m, day:b.d, name:e.name,
+              label:`${years}周年・${name}`, icon:"💍"});
+          }
+        });
+      }
+    });
+
+    rows.sort((a,b)=>a.year-b.year||a.month-b.month||a.day-b.day);
+
+    $("autoMilestones").innerHTML=rows.length
+      ? rows.map(r=>`<div class="item">
+          <strong>${r.icon} ${escapeHtml(r.name)}</strong>
+          <div class="muted">${r.year}/${r.month+1}/${r.day}　${escapeHtml(r.label)}</div>
+        </div>`).join("")
+      : "誕生日や結婚記念日を登録すると、自動で特別な節目を表示します。";
+  }
+
   function render(){
     const y=view.getFullYear(),m=view.getMonth();
     $("monthPickerLabel").textContent=`${y}年${m+1}月`;
@@ -251,6 +310,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     renderDetails();renderList();
     renderUpcoming();
     renderYearList();
+    renderAutoMilestones();
   }
   function renderDetails(){
     const es=onDate(selected.y,selected.m,selected.d);
@@ -273,7 +333,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     });
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-  function hint(){const t=$("type").value;$("hint").textContent=t==="memorial"?"亡くなった日から一周忌・三回忌・七回忌などを自動表示します。":t==="birthday"?"生年月日から毎年の年齢を自動表示します。":t==="anniversary"?"基準日から毎年の周年を自動表示します。":"毎年の同じ日に出来事を表示します。"}
+  function hint(){const t=$("type").value;$("hint").textContent=t==="memorial"?"亡くなった日から一周忌・三回忌・七回忌などを自動表示します。":t==="birthday"?"生年月日から毎年の年齢を自動表示します。":t==="anniversary"?"基準日から毎年の周年を自動表示します。":t==="wedding"?"結婚記念日から紙婚式・銀婚式・金婚式などを自動表示します。":"毎年の同じ日に出来事を表示します。"}
   $("todayBtn").onclick=()=>{view=new Date(today.y,today.m,1);selected={...today};syncCalendarDatePicker();render()};
   $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);syncCalendarDatePicker();render()};
   $("next").onclick=()=>{view.setMonth(view.getMonth()+1);syncCalendarDatePicker();render()};

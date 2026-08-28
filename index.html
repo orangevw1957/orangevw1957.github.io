@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v3.6">
+<meta name="app-version" content="v3.7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -119,7 +119,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     <form id="form" class="hidden">
       <label for="type">種類</label>
       <select id="type">
-        
         <option value="birthday">🎂 誕生日</option>
         <option value="wedding">💍 結婚記念日</option>
         <option value="anniversary">📅 周年・記念日</option>
@@ -130,7 +129,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
         <option value="meeting">❤️ 出会った日</option>
         <option value="memory">⭐ 思い出の日</option>
         <option value="other">その他</option>
-      
       </select>
       <label for="name">名前</label>
       <input id="name" required maxlength="40" placeholder="例：父、母、入社、結婚">
@@ -188,8 +186,11 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     return n>0?n+"年目":"";
   }
   function icon(t){
-    const icons={birthday:"🎂",wedding:"💍",anniversary:"📅",memorial:"🕊️",work:"💼",business:"🏢",pet:"🐕",meeting:"❤️",memory:"⭐",other:"📅"};
-    return icons[t]||"📅";
+    const icons={
+      birthday:"🎂", wedding:"💍", anniversary:"📅", memorial:"🕊️",
+      work:"💼", business:"🏢", pet:"🐕", meeting:"❤️", memory:"⭐", other:"📅"
+    };
+    return icons[t] || "📅";
   }
 
   function renderUpcoming(){
@@ -252,13 +253,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     50:"金婚式", 55:"エメラルド婚式", 60:"ダイヤモンド婚式",
     65:"ブルースターサファイア婚式", 70:"プラチナ婚式"
   };
-
-  function renderAutoMilestones(){
-    // v3.5: 自動節目は独立した枠を作らず、該当する出来事の表示に統合します。
-  }
-
-
-  function render(){
+function render(){
     const y=view.getFullYear(),m=view.getMonth();
     $("monthPickerLabel").textContent=`${y}年${m+1}月`;
     $("cal").innerHTML=["日","月","火","水","木","金","土"].map(x=>`<div class="dow">${x}</div>`).join("");
@@ -274,7 +269,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     renderDetails();renderList();
     renderUpcoming();
     renderYearList();
-    renderAutoMilestones();
+    
   }
   function renderDetails(){
     const es=onDate(selected.y,selected.m,selected.d);

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v2.4">
+<meta name="app-version" content="v2.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -20,7 +20,7 @@ button,input,select{font:inherit}button{min-height:44px;border-radius:10px;borde
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;font-size:12px;color:#777;padding:4px}.day{min-height:78px;padding:6px;text-align:left;vertical-align:top}.today{outline:2px solid #222}.selected{background:#eee}
 .event{font-size:11px;line-height:1.35;margin-top:4px;overflow:hidden}.muted{color:#777;font-size:13px}
 label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,select{width:100%;padding:11px;border:1px solid #ccc;border-radius:10px;background:#fff}
-.hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:auto;cursor:default}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
+.hidden{display:none}.item{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:8px}.saved-item{touch-action:none;cursor:grab}.saved-item.dragging{opacity:.55}.drag-handle{display:inline-block;margin-right:6px;color:#777;font-size:18px}.danger{color:#a00}
 @media(max-width:420px){main{padding:12px}.day{min-height:68px;padding:4px}.event{font-size:10px}.card{padding:12px}}
 
   .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:92px}.picker-overlay.hidden{display:none}
@@ -133,7 +133,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   <section class="card">
     <div class="row"><button id="savedToggle" type="button" style="border:0;background:transparent;padding:8px 0;font-weight:700">登録済み　<span id="savedArrow">▶</span></button><span id="savedCount" class="muted"></span></div>
-    <div id="savedBody" class="hidden">
+    <div id="savedBody" style="display:none">
     <div id="list"></div>
     <button id="clearAll" type="button" class="danger" style="margin-top:10px">全データを削除</button>
     </div>
@@ -204,7 +204,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
 
   function render(){
     const y=view.getFullYear(),m=view.getMonth();
-    $("monthPickerBtn").textContent=`${y}年${m+1}月`;
+    $("monthPickerLabel").textContent=`${y}年${m+1}月`;
     $("cal").innerHTML=["日","月","火","水","木","金","土"].map(x=>`<div class="dow">${x}</div>`).join("");
     const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
     for(let i=0;i<first;i++)$("cal").insertAdjacentHTML("beforeend","<div></div>");

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<meta name="app-version" content="v4.01">
+<meta name="app-version" content="v4.02">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="節目カレンダー">
@@ -222,24 +222,54 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   function render(){
     const y=view.getFullYear(),m=view.getMonth();
     $("monthPickerLabel").textContent=`${y}年${m+1}月`;
-    $("cal").innerHTML=["日","月","火","水","木","金","土"].map(x=>`<div class="dow">${x}</div>`).join("");
-    const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
-    for(let i=0;i<first;i++)$("cal").insertAdjacentHTML("beforeend","<div></div>");
+
+    // Safari対策：描画途中でカレンダーを空にしない。
+    // 完成したDOMを最後に一度だけ差し替える。
+    const frag=document.createDocumentFragment();
+    ["日","月","火","水","木","金","土"].forEach(x=>{
+      const el=document.createElement("div");
+      el.className="dow";
+      el.textContent=x;
+      frag.appendChild(el);
+    });
+    const first=new Date(y,m,1).getDay();
+    const last=new Date(y,m+1,0).getDate();
+    for(let i=0;i<first;i++) frag.appendChild(document.createElement("div"));
     for(let d=1;d<=last;d++){
-      const es=onDate(y,m,d), td=y===today.y&&m===today.m&&d===today.d, sel=y===selected.y&&m===selected.m&&d===selected.d;
-      const b=document.createElement("button"); b.type="button"; b.className="day"+(td?" today":"")+(sel?" selected":"");
-      b.innerHTML=`<strong>${d}</strong>`+es.slice(0,3).map(e=>`<div class="event">${icon(e.type)} ${escapeHtml(e.name)} ${escapeHtml(e.calc)}</div>`).join("")+(es.length>3?`<div class="event">＋${es.length-3}件</div>`:"");
+      const es=onDate(y,m,d);
+      const td=y===today.y&&m===today.m&&d===today.d;
+      const sel=y===selected.y&&m===selected.m&&d===selected.d;
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="day"+(td?" today":"")+(sel?" selected":"");
+      const strong=document.createElement("strong");
+      strong.textContent=d;
+      b.appendChild(strong);
+      es.slice(0,3).forEach(e=>{
+        const div=document.createElement("div");
+        div.className="event";
+        div.textContent=`${icon(e.type)} ${e.name} ${e.calc}`;
+        b.appendChild(div);
+      });
+      if(es.length>3){
+        const div=document.createElement("div");
+        div.className="event";
+        div.textContent=`＋${es.length-3}件`;
+        b.appendChild(div);
+      }
       b.onclick=()=>{selected={y,m,d};render();renderDetails()};
-      $("cal").appendChild(b);
+      frag.appendChild(b);
     }
-    renderDetails();renderList();
+    $("cal").replaceChildren(frag);
+    renderDetails();
+    renderList();
     renderUpcoming();
   }
   function renderDetails(){
     const es=onDate(selected.y,selected.m,selected.d);
     $("selectedTitle").textContent=`${selected.y}年${selected.m+1}月${selected.d}日`;
     $("count").textContent=es.length?es.length+"件":"";
-    $("details").innerHTML=es.length?es.map(e=>`<div class="item"><strong>${icon(e.type)} ${escapeHtml(e.name)}　${escapeHtml(e.calc)}</strong><div class="muted">基準日：${e.date.replaceAll("-","/")}${e.memo?"　"+escapeHtml(e.memo):""}</div></div>`).join(""):`<p class="muted">この日の節目はありません。</p>`;
+    $("details").innerHTML=es.length?es.map(e=>`<div class="item"><strong>${icon(e.type)} ${escapeHtml(e.name)}　${escapeHtml(e.calc)}</strong><div class="muted">基準日：${e.date.split("-").join("/")}${e.memo?"　"+escapeHtml(e.memo):""}</div></div>`).join(""):`<p class="muted">この日の節目はありません。</p>`;
   }
   function renderList(){
     $("savedCount").textContent=events.length+"件";
@@ -247,7 +277,7 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
     $("list").innerHTML=sorted.length
       ? sorted.map(({e,i})=>`<div class="item saved-item">
           <div><strong>${icon(e.type)} ${escapeHtml(e.name)}</strong></div>
-          <div class="muted">${e.date.replaceAll("-","/")}　${escapeHtml(e.memo||"")}</div>
+          <div class="muted">${e.date.split("-").join("/")}　${escapeHtml(e.memo||"")}</div>
           <button type="button" data-del="${i}" style="margin-top:7px">削除</button>
         </div>`).join("")
       : `<p class="muted">まだ登録されていません。</p>`;
@@ -386,6 +416,6 @@ label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}input,selec
   render();
 })();
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js?v=3.0').catch(()=>{});}</script>
+
 </body>
 </html>
